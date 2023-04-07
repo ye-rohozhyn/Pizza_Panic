@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class HandsController : MonoBehaviour
@@ -26,6 +27,7 @@ public class HandsController : MonoBehaviour
     private JointDrive _drive;
     private Rigidbody _handLeftRb, _handRightRb;
     private Transform _rightHand, _leftHand;
+    private List<Pizza> _pizzas = new();
 
     private void Start()
     {
@@ -45,51 +47,79 @@ public class HandsController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        Pizza pizza = other.GetComponent<Pizza>();
+
+        if (!pizza) return;
+
+        if (_pizzas.IndexOf(pizza) == -1)
+        {
+            pizza.SetParent(pizzaHolder, new(0, 0.0015f * _pizzas.Count, 0.003f));
+            _pizzas.Add(pizza);
+            
+            if (_pizzas.Count == 1) EnableCarrying();
+        }
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            OnClickCarryingBtn();
+            DisableCarrying();
         }
     }
 
-    public void OnClickCarryingBtn()
+    private void EnableCarrying()
     {
-        _isCarrying = !_isCarrying;
+        _isCarrying = true;
 
         playerAnimator.SetBool(_isCarryingHash, _isCarrying);
 
-        _drive.positionSpring = _isCarrying ? maxSpring : defaultSpring;
+        _drive.positionSpring = maxSpring;
 
         foreach (ConfigurableJoint joint in physicalHandParts) joint.slerpDrive = _drive;
         handLeft.slerpDrive = _drive;
         handRight.slerpDrive = _drive;
 
-        if (_isCarrying)
+        for (int i = 0; i < physicalHandParts.Length; i++)
         {
-            for (int i = 0; i < physicalHandParts.Length; i++)
-            {
-                physicalHandParts[i].targetRotation = Quaternion.Inverse(targetRotation[i]) * _startHandPartsRotation[i];
-                physicalHandParts[i].transform.localRotation = targetRotation[i];
-            }
-
-            pizzaHolder.position = Vector3.Lerp(_rightHand.position, _leftHand.position, 0.5f);
-            pizzaHolder.localRotation = Quaternion.Euler(8, 0, 0);
-
-            pizzaHolderConfJoint.connectedBody = middleSpine;
-            leftFixedJoint.connectedBody = _handLeftRb;
-            rightFixedJoint.connectedBody = _handRightRb;
+            physicalHandParts[i].targetRotation = Quaternion.Inverse(targetRotation[i]) * _startHandPartsRotation[i];
+            physicalHandParts[i].transform.localRotation = targetRotation[i];
         }
-        else
+
+        pizzaHolder.position = Vector3.Lerp(_rightHand.position, _leftHand.position, 0.5f);
+        pizzaHolder.localRotation = Quaternion.Euler(8, 0, 0);
+
+        pizzaHolderConfJoint.connectedBody = middleSpine;
+        leftFixedJoint.connectedBody = _handLeftRb;
+        rightFixedJoint.connectedBody = _handRightRb;
+    }
+
+    private void DisableCarrying()
+    {
+        if (!_isCarrying) return;
+
+        _isCarrying = false;
+
+        playerAnimator.SetBool(_isCarryingHash, _isCarrying);
+
+        _drive.positionSpring = defaultSpring;
+
+        foreach (ConfigurableJoint joint in physicalHandParts) joint.slerpDrive = _drive;
+        handLeft.slerpDrive = _drive;
+        handRight.slerpDrive = _drive;
+
+        foreach (Pizza pizza in _pizzas) pizza.ClearParent();
+        _pizzas.Clear();
+
+        for (int i = 0; i < physicalHandParts.Length; i++)
         {
-            for (int i = 0; i < physicalHandParts.Length; i++)
-            {
-                physicalHandParts[i].targetRotation = Quaternion.identity;
-            }
-
-            pizzaHolderConfJoint.connectedBody = null;
-            leftFixedJoint.connectedBody = null;
-            rightFixedJoint.connectedBody = null;
+            physicalHandParts[i].targetRotation = Quaternion.identity;
         }
+
+        pizzaHolderConfJoint.connectedBody = null;
+        leftFixedJoint.connectedBody = null;
+        rightFixedJoint.connectedBody = null;
     }
 }
