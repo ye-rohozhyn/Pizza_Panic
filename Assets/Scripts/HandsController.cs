@@ -22,12 +22,23 @@ public class HandsController : MonoBehaviour
     [SerializeField] private FixedJoint leftFixedJoint, rightFixedJoint;
     [SerializeField] private ConfigurableJoint pizzaHolderConfJoint;
 
-    private bool _isCarrying;
+    [Header("Grabbing")]
+    [SerializeField] private Transform leftCheckPoint;
+    [SerializeField] private Transform rightCheckPoint;
+    [SerializeField] private LayerMask grabbingLayer;
+    [SerializeField] private float checkRadius = 0.1f;
+    [SerializeField] private ConfigurableJoint leftUpperArm;
+    [SerializeField] private ConfigurableJoint rightUpperArm;
+    [SerializeField] private Quaternion leftTargetRotation;
+    [SerializeField] private Quaternion rightTargetRotation;
+
+    private HandState _handState;
     private int _isCarryingHash;
     private JointDrive _drive;
     private Rigidbody _handLeftRb, _handRightRb;
     private Transform _rightHand, _leftHand;
     private List<Pizza> _pizzas = new();
+    private GameObject _leftGrabbingObj, _rightGrabbingObj;
 
     private void Start()
     {
@@ -49,6 +60,8 @@ public class HandsController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (_handState == HandState.Grabbing) return;
+
         Pizza pizza = other.GetComponent<Pizza>();
 
         if (!pizza) return;
@@ -66,15 +79,106 @@ public class HandsController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            DisableCarrying();
+            if (_handState == HandState.Carrying)
+            {
+                DisableCarrying();
+            }
+            else
+            {
+                _handState = HandState.Grabbing;
+
+                leftUpperArm.targetRotation = leftTargetRotation;
+                rightUpperArm.targetRotation = rightTargetRotation;
+            }
+        }
+        else if (Input.GetKey(KeyCode.E) & _handState == HandState.Grabbing)
+        {
+            if (!_leftGrabbingObj)
+            {
+                var colliders = Physics.OverlapSphere(leftCheckPoint.position, checkRadius, grabbingLayer);
+
+                if (colliders.Length == 0) return;
+
+                Rigidbody grabbingRb = colliders[0].GetComponent<Rigidbody>();
+
+                if (grabbingRb)
+                {
+                    _leftGrabbingObj = grabbingRb.gameObject;
+
+                    FixedJoint fj = _leftGrabbingObj.AddComponent<FixedJoint>();
+                    fj.connectedBody = _handLeftRb;
+                    fj.breakForce = 9000;
+                }
+            }
+
+            if (!_rightGrabbingObj)
+            {
+                var colliders = Physics.OverlapSphere(rightCheckPoint.position, checkRadius, grabbingLayer);
+
+                if (colliders.Length == 0) return;
+
+                Rigidbody grabbingRb = colliders[0].GetComponent<Rigidbody>();
+
+                if (grabbingRb)
+                {
+                    _rightGrabbingObj = grabbingRb.gameObject;
+
+                    FixedJoint fj = _rightGrabbingObj.AddComponent<FixedJoint>();
+                    fj.connectedBody = _handRightRb;
+                    fj.breakForce = 9000;
+                }
+            }
+        }
+        else if (Input.GetKeyUp(KeyCode.E))
+        {
+            if (_pizzas.Count == 0)
+            {
+                if (_handState == HandState.Grabbing)
+                {
+                    if (_leftGrabbingObj == _rightGrabbingObj & _leftGrabbingObj != null & _rightGrabbingObj != null)
+                    {
+                        foreach(FixedJoint fj in _leftGrabbingObj.GetComponents<FixedJoint>())
+                        {
+                            Destroy(fj);
+                        }
+
+                        _leftGrabbingObj = null;
+                        _rightGrabbingObj = null;
+
+                        _handState = HandState.Normal;
+
+                        leftUpperArm.targetRotation = Quaternion.identity;
+                        rightUpperArm.targetRotation = Quaternion.identity;
+
+                        return;
+                    }
+
+                    if (_leftGrabbingObj)
+                    {
+                        Destroy(_leftGrabbingObj.GetComponent<FixedJoint>());
+                        _leftGrabbingObj = null;
+                    }
+
+                    if (_rightGrabbingObj)
+                    {
+                        Destroy(_rightGrabbingObj.GetComponent<FixedJoint>());
+                        _rightGrabbingObj = null;
+                    }
+                }
+
+                _handState = HandState.Normal;
+
+                leftUpperArm.targetRotation = Quaternion.identity;
+                rightUpperArm.targetRotation = Quaternion.identity;
+            }
         }
     }
 
     private void EnableCarrying()
     {
-        _isCarrying = true;
+        _handState = HandState.Carrying;
 
-        playerAnimator.SetBool(_isCarryingHash, _isCarrying);
+        playerAnimator.SetBool(_isCarryingHash, true);
 
         _drive.positionSpring = maxSpring;
 
@@ -98,11 +202,9 @@ public class HandsController : MonoBehaviour
 
     private void DisableCarrying()
     {
-        if (!_isCarrying) return;
+        _handState = HandState.Normal;
 
-        _isCarrying = false;
-
-        playerAnimator.SetBool(_isCarryingHash, _isCarrying);
+        playerAnimator.SetBool(_isCarryingHash, false);
 
         _drive.positionSpring = defaultSpring;
 
@@ -122,4 +224,10 @@ public class HandsController : MonoBehaviour
         leftFixedJoint.connectedBody = null;
         rightFixedJoint.connectedBody = null;
     }
+}
+
+
+public enum HandState
+{
+    Normal, Carrying, Grabbing
 }
