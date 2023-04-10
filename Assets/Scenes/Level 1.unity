@@ -364,7 +364,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAnimator: {fileID: 5866666019967856273}
-  defaultSpring: 1000
+  defaultSpring: 5000
   maxSpring: 9999999
   physicalHandParts:
   - {fileID: 5532969149851150085}
@@ -499,7 +499,7 @@ GameObject:
   - component: {fileID: 765002522}
   - component: {fileID: 765002521}
   - component: {fileID: 765002520}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1757,9 +1757,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08437d0b9ae241f44a957600a2c76583, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerRogidbody: {fileID: 2024671767}
+  playerRigidbody: {fileID: 2024671767}
   moveSpeed: 15
+  moveSpeedInAir: 4.5
+  jumpForce: 350
   playerAnimator: {fileID: 5866666019967856273}
+  checkSphereRadius: 0.25
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 72
+  _isRunning: 0
+  _isGrounded: 0
+  _jumpStarted: 0
 --- !u!4 &950853232129949128
 Transform:
   m_ObjectHideFlags: 0
@@ -2409,7 +2418,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 1000
+    positionSpring: 5000
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
@@ -3005,7 +3014,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 1000
+    positionSpring: 5000
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
@@ -3214,7 +3223,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 1000
+    positionSpring: 5000
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
@@ -4119,7 +4128,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 1000
+    positionSpring: 5000
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
@@ -4439,7 +4448,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 1000
+    positionSpring: 5000
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
@@ -4616,7 +4625,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 1000
+    positionSpring: 5000
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
