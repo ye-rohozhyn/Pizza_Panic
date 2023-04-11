@@ -35,13 +35,15 @@ public class PlayerMovement : MonoBehaviour
     {
         _movement.Set(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         _isRunning = _movement != Vector3.zero;
-        _isGrounded = Physics.CheckSphere(_playerTransform.position, checkSphereRadius, groundMask);
+        
         if (playerAnimator) playerAnimator.SetBool(_isRunningHash, _isRunning);
         if (Input.GetButtonDown("Jump") & _isGrounded) _jumpStarted = true; 
     }
 
     private void FixedUpdate()
     {
+        _isGrounded = Physics.CheckSphere(_playerTransform.position, checkSphereRadius, groundMask);
+
         MoveCharacter();
     }
 
@@ -58,8 +60,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (_jumpStarted)
         {
-            _jumpStarted = false;
             playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            _jumpStarted = false;
         }
 
         if (playerRigidbody.velocity.magnitude >= speed)
