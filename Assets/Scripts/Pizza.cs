@@ -7,7 +7,7 @@ public class Pizza : MonoBehaviour
 
     private void Start()
     {
-        ClearParent();
+        ClearParent(false);
     }
 
     public void SetParent(Transform parent, Vector3 offset)
@@ -19,11 +19,11 @@ public class Pizza : MonoBehaviour
         transform.localRotation = Quaternion.identity;
     }
 
-    public void ClearParent()
+    public void ClearParent(bool front)
     {
         pizzaRigidbody.isKinematic = false;
         physicsCollider.enabled = true;
         transform.SetParent(null);
-        transform.position += transform.forward;
+        if (front) transform.position += transform.forward;
     }
 }

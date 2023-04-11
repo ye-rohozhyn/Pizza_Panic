@@ -363,6 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 626c410d02c71c9448aa97dd58d5479b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerMovement: {fileID: 919132148211305597}
   playerAnimator: {fileID: 5866666019967856273}
   defaultSpring: 5000
   maxSpring: 9999999
@@ -1397,7 +1398,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -2.7533314e-16, y: -0.0016000009, z: 0.007099999}
+  m_ConnectedAnchor: {x: -0.00000016927721, y: 0.8633161, z: 0.64666545}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 2
@@ -1920,17 +1921,57 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerRigidbody: {fileID: 2024671767}
+  bones:
+  - {fileID: 530274828798345815}
+  - {fileID: 7304328226280119380}
+  - {fileID: 5532969149851150085}
+  - {fileID: 2855025150615115732}
+  - {fileID: 8266177127320560408}
+  - {fileID: 7545203747140778231}
+  - {fileID: 8327223563933855245}
+  - {fileID: 5423580679485913734}
+  - {fileID: 8186382482749155067}
+  - {fileID: 3016418732541194648}
+  - {fileID: 2693816876768356755}
+  - {fileID: 6672041803415825016}
+  unconsciousSpring: 500
   moveSpeed: 15
   moveSpeedInAir: 4
-  jumpForce: 350
+  jumpForce: 370
+  gravity: {x: 0, y: -9.81, z: 0}
+  gravityScale: 5
+  fallingGravityScale: 35
   playerAnimator: {fileID: 5866666019967856273}
+  pelvis: {fileID: 5746564758609612561}
+  duration: 5
+  slerpDriveCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   checkSphereRadius: 0.25
   groundMask:
     serializedVersion: 2
     m_Bits: 72
-  _isRunning: 0
-  _isGrounded: 0
-  _jumpStarted: 0
 --- !u!4 &950853232129949128
 Transform:
   m_ObjectHideFlags: 0
@@ -2459,7 +2500,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2007460017900474589}
-  m_LocalRotation: {x: 0.17390236, y: -0.0027032166, z: -0.03921257, w: 0.9839782}
+  m_LocalRotation: {x: 0.06751719, y: 0.0015120428, z: -0.039276596, w: 0.9969436}
   m_LocalPosition: {x: -1.1096991e-10, y: 0.0032543615, z: 3.7252902e-11}
   m_LocalScale: {x: 1, y: 0.99999994, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2467,7 +2508,7 @@ Transform:
   - {fileID: 8266177127320560405}
   m_Father: {fileID: 5532969149851150081}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 160, y: 178.844, z: 175.232}
+  m_LocalEulerAnglesHint: {x: 172.256, y: 179.868, z: 175.479}
 --- !u!54 &2855025150615115730
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2534,7 +2575,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: -20
+    limit: -10
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -3037,7 +3078,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8327223563933855241}
-  m_LocalRotation: {x: 0.17390236, y: 0.0027032166, z: 0.03921257, w: 0.9839782}
+  m_LocalRotation: {x: 0.0675171, y: -0.0015119832, z: 0.039276686, w: 0.99694365}
   m_LocalPosition: {x: -4.2835957e-10, y: 0.0032543605, z: 4.1909514e-11}
   m_LocalScale: {x: 1, y: 0.99999994, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3045,7 +3086,7 @@ Transform:
   - {fileID: 5423580679485913731}
   m_Father: {fileID: 7545203747140778227}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 160, y: -178.844, z: -175.232}
+  m_LocalEulerAnglesHint: {x: 172.256, y: -179.868, z: -175.479}
 --- !u!4 &5321564517843516217
 Transform:
   m_ObjectHideFlags: 0
@@ -3106,7 +3147,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -6.693881e-10, y: 0.0037355963, z: 0}
+  m_ConnectedAnchor: {x: -0.0000000010477379, y: 0.0037355984, z: -2.3283064e-10}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -3527,7 +3568,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 50000
+    positionSpring: 10000
     positionDamper: 1000
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
@@ -4100,7 +4141,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
     serializedVersion: 3
-    positionSpring: 5000
+    positionSpring: 500
     positionDamper: 100
     maximumForce: 3.4028233e+38
   m_ProjectionMode: 0
@@ -4540,7 +4581,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -8.731149e-10, y: 0.0037355993, z: -2.910383e-10}
+  m_ConnectedAnchor: {x: -1.7462298e-10, y: 0.0037356, z: -8.1490725e-10}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -4741,7 +4782,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: -20
+    limit: -10
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
