@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 15f;
     [SerializeField] private float moveSpeedInAir = 1f;
     [SerializeField] private float jumpForce = 100f;
+    private float _speedMultiplier;
 
     [Header("Gravity")]
     [SerializeField] private Vector3 gravity = Physics.gravity;
@@ -22,7 +23,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("Animations")]
     [SerializeField] private Animator playerAnimator;
     [SerializeField] private ConfigurableJoint pelvis;
-    [SerializeField] private float duration = 1.0f;
+    [SerializeField] private float returnBoneSpringDuration = 5.0f;
+    [SerializeField] private float returnSpeedDuration = 2.0f;
 
     [Header("Check ground")]
     [SerializeField] private float checkSphereRadius = 0.25f;
@@ -38,11 +40,11 @@ public class PlayerMovement : MonoBehaviour
     private Transform _playerTransform;
     private Vector3 _movement;
     private JointDrive _pelvisDrive;
-
-    private float timeElapsed;
+    private float _currentSpeed;
 
     private void Start()
     {
+        _speedMultiplier = 1;
         _playerTransform = playerRigidbody.transform;
         _isRunningHash = Animator.StringToHash("isRunning");
         _pelvisDrive = pelvis.slerpDrive;
@@ -54,14 +56,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            _enable = !_enable;
-
-            if (_enable) EnableActiveRagdoll();
-            else DisableActiveRagdoll();
-        }
-
         if (!_enable) return;
 
         _movement.Set(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
@@ -81,8 +75,21 @@ public class PlayerMovement : MonoBehaviour
         MoveCharacter();
     }
 
+    public IEnumerator KnockOut()
+    {
+        DisableActiveRagdoll();
+
+        float waitTime = Random.Range(3f, 5f);
+        yield return new WaitForSeconds(waitTime);
+
+        EnableActiveRagdoll();
+    }
+
     private void DisableActiveRagdoll()
     {
+        _enable = false;
+        _speedMultiplier = 0;
+
         StopSlerpDriveReturn();
 
         _isRunning = false;
@@ -106,6 +113,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void EnableActiveRagdoll()
     {
+        _enable = true;
+        StartCoroutine(ReturnSpeedMultiplier(0, 1, returnSpeedDuration));
+        StartCoroutine(ReturnAnimationSpeed(0, 1, returnSpeedDuration));
+
         _coroutines[0] = StartCoroutine(SlerpDriveReturn(pelvis, _pelvisDrive.positionSpring, true));
         
         for (int i = 0; i < _driveBones.Length; i++)
@@ -119,9 +130,9 @@ public class PlayerMovement : MonoBehaviour
         float startValue = joint.slerpDrive.positionSpring;
         float timeStarted = Time.time;
 
-        while (Time.time - timeStarted < duration)
+        while (Time.time - timeStarted < returnBoneSpringDuration)
         {
-            float currentValue = Mathf.Lerp(startValue, targetValue, (Time.time - timeStarted) / duration);
+            float currentValue = Mathf.Lerp(startValue, targetValue, (Time.time - timeStarted) / returnBoneSpringDuration);
 
             JointDrive newDrive = joint.slerpDrive;
             newDrive.positionSpring = currentValue;
@@ -155,6 +166,36 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private IEnumerator ReturnSpeedMultiplier(float startValue, float endValue, float duration)
+    {
+        float elapsedTime = 0.0f;
+        while (elapsedTime < duration)
+        {
+            _speedMultiplier = Mathf.Lerp(startValue, endValue, elapsedTime / duration);
+
+            elapsedTime += Time.deltaTime;
+
+            yield return null;
+        }
+
+        _speedMultiplier = endValue;
+    }
+
+    private IEnumerator ReturnAnimationSpeed(float startValue, float endValue, float duration)
+    {
+        float elapsedTime = 0.0f;
+        while (elapsedTime < duration)
+        {
+            playerAnimator.speed = Mathf.Lerp(startValue, endValue, elapsedTime / duration);
+
+            elapsedTime += Time.deltaTime;
+
+            yield return null;
+        }
+
+        playerAnimator.speed = endValue;
+    }
+
     private void ControlGravityScale()
     {
         if (playerRigidbody.velocity.y >= 0)
@@ -169,12 +210,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void MoveCharacter()
     {
-        float speed = _isGrounded ? moveSpeed : moveSpeedInAir;
+        _currentSpeed = (_isGrounded ? moveSpeed : moveSpeedInAir) *_speedMultiplier;
 
         _movement.Normalize();
         if (_isRunning)
         {
-            playerRigidbody.velocity = speed * _movement;
+            playerRigidbody.velocity = _currentSpeed * _movement;
             _playerTransform.forward = _movement;
         }
 
@@ -184,9 +225,9 @@ public class PlayerMovement : MonoBehaviour
             _jumpStarted = false;
         }
 
-        if (playerRigidbody.velocity.magnitude >= speed)
+        if (playerRigidbody.velocity.magnitude >= _currentSpeed)
         {
-            playerRigidbody.velocity = playerRigidbody.velocity.normalized * speed;
+            playerRigidbody.velocity = playerRigidbody.velocity.normalized * _currentSpeed;
         }
     }
 }
